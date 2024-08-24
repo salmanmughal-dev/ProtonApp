@@ -1,6 +1,6 @@
 import PatientForm from "@/components/forms/PatientForm";
 import { Button } from "@/components/ui/button";
-import { Link } from "lucide-react";
+import Link from "next/link";
 import Image from "next/image";
 
 export default function Home() {
@@ -19,15 +19,16 @@ export default function Home() {
             />
             <div className="text-2xl">Proton</div>
           </div>
-
+          {/* Make this component client as this part needs user interaction */}
           <PatientForm />
 
-          <div className="text-14-regular flex justify-between">
-            <p className="justify-items-end text-dark-600 xl: text-left">
-              ProtonApp Powered by Next LinkedIn :
-              https://www.linkedin.com/in/salman-mughal-full-stack-developer/
+          <div className="text-14-regular mt-20 flex items-center justify-between">
+            <p className="justify-items-end text-dark-600 xl:text-left">
+              © 2024 Proton Powered by Next Typescript Shadcn
             </p>
-            <Link href="/?admin=true">Admin</Link>
+            <Link href="/?admin=true" className="text-green-700 text-2xl">
+              Admin
+            </Link>
           </div>
         </div>
       </section>
