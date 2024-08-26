@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import CustomFormField from "../CustomFormField";
 import SubmitButton from "../SubmitButton";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createUser } from "@/lib/actions/patient.actions";
 
 export enum FormFieldTypes {
   INPUT = "input",
@@ -22,6 +24,7 @@ export enum FormFieldTypes {
 }
 
 const PatientForm = () => {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // 1. Define your form.
   const form = useForm<z.infer<typeof userFormSchema>>({
@@ -39,8 +42,14 @@ const PatientForm = () => {
     const { name, email, phone } = values;
 
     try {
-      const user = { email, name, phone };
-      console.log(user);
+      const formData = { email, name, phone };
+
+      const newUser = await createUser(formData);
+
+      if (newUser) {
+        setIsLoading(false);
+        router.push(`/patients/${newUser.$id}/register`);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -50,7 +59,9 @@ const PatientForm = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex-1">
         <section className="mb-12 space-y-4">
-          <h1 className="header">Asslam Alaikum ! 🙂</h1>
+          <h1 className="header">
+            السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ للَّهِ وَبَرَكاتُهُ
+          </h1>
           <p className="text-dark-700">Schedule your appointment !</p>
         </section>
 
