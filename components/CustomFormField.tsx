@@ -1,7 +1,9 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-
+import { useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import {
   FormControl,
   FormDescription,
@@ -11,10 +13,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Control, Field } from "react-hook-form";
+import { Control, Field, Form } from "react-hook-form";
 import { FormFieldTypes } from "./forms/PatientForm";
 import "react-phone-number-input/style.css";
 import PhoneInput from "react-phone-number-input";
+import { Select, SelectContent, SelectTrigger, SelectValue } from "./ui/select";
+import { Textarea } from "./ui/textarea";
 
 const RenderField = ({
   field,
@@ -62,8 +66,61 @@ const RenderField = ({
       );
     }
 
+    case FormFieldTypes.DATE_PICKER: {
+      return (
+        <div className="flex rounded-md border border-dark-500 bg-dark-400">
+          <Image
+            className="ml-2"
+            src={"/assets/calender.svg"}
+            alt="calenderIcon"
+            width={24}
+            height={24}
+          />
+          <FormControl>
+            <DatePicker
+              selected={field.value}
+              dateFormat={props.daateFormat ?? "dd/MM/yyyy"}
+              onChange={(date) => field.onChange(date)}
+              showTimeSelect={props.showTimeSelect ?? false}
+              timeInputLabel="Time:"
+              wrapperClassName="date-picker"
+            />
+          </FormControl>
+        </div>
+      );
+    }
+
+    case FormFieldTypes.SELECT:
+      return (
+        <FormControl>
+          <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <FormControl>
+              <SelectTrigger className="shad-select-trigger">
+                <SelectValue placeholder={props.placeholder} />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent className="shad-select-content">
+              {props.children}
+            </SelectContent>
+          </Select>
+        </FormControl>
+      );
+
+    case FormFieldTypes.TEXTAREA:
+      return (
+        <FormControl>
+          <Textarea
+            placeholder={props.placeholder}
+            {...field}
+            className="shad-textArea"
+            disabled={props.disabled}
+          />
+        </FormControl>
+      );
+    case FormFieldTypes.SKELETON:
+      return props.renderSkeleton ? props.renderSkeleton(field) : null;
     default:
-      break;
+      return null;
   }
 };
 
