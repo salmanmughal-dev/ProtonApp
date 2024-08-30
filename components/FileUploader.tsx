@@ -2,7 +2,7 @@
 import { convertFileToUrl } from "@/lib/utils";
 import { appendFile } from "fs";
 import Image from "next/image";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 
 type filesPropsType = {
@@ -13,6 +13,7 @@ export default function FileUploader({ files, onChange }: filesPropsType) {
   const onDrop = useCallback((acceptedFiles: File[]) => {
     onChange(acceptedFiles);
   }, []);
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   return (

@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
-import userFormSchema from "@/zodSchema/userFormSchema";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -16,10 +15,22 @@ import { User } from "@/interfaces";
 import { FormFieldTypes } from "./PatientForm";
 import { RadioGroupItem, RadioGroup } from "../ui/radio-group";
 import { Label } from "../ui/label";
-import { Doctors, IdentificationTypes } from "@/constants";
+
+import { ToastContainer, toast } from "react-toastify";
+import {
+  Doctors,
+  IdentificationTypes,
+  PatientFormDefaultValues,
+} from "@/constants";
 import { SelectItem } from "../ui/select";
 import Image from "next/image";
 import FileUploader from "../FileUploader";
+import PatientFormValidation from "@/zodSchema/patientFormSchema";
+import { registerPatient } from "@/lib/actions/registerPatient";
+import { convertFileToUrl } from "@/lib/utils";
+import { BUCKET_ID, storage } from "@/lib/appwrite.config";
+import { ID } from "node-appwrite";
+import { debug } from "console";
 
 const RegisterForm = ({ user }: { user: User }) => {
   const router = useRouter();
@@ -29,31 +40,54 @@ const RegisterForm = ({ user }: { user: User }) => {
   const [isShowIdentification, setIsShowIdentification] =
     useState<boolean>(false);
   // 1. Define your form.
-  const form = useForm<z.infer<typeof userFormSchema>>({
-    resolver: zodResolver(userFormSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-    },
+  const form = useForm<z.infer<typeof PatientFormValidation>>({
+    resolver: zodResolver(PatientFormValidation),
+    defaultValues: PatientFormDefaultValues,
   });
 
   // 2. Define a submit handler.
-  async function onSubmit(values: z.infer<typeof userFormSchema>) {
+  async function onSubmit(values: z.infer<typeof PatientFormValidation>) {
     setIsLoading(true);
-    const { name, email, phone } = values;
+    if (
+      values.identificationDocument &&
+      values.identificationDocument?.length > 0
+    ) {
+      if (
+        values.identificationDocument &&
+        values.identificationDocument?.length > 0
+      ) {
+        const file = values.identificationDocument![0];
+        const blob = new Blob([file], { type: file.type });
+        // @ts-ignore
 
-    try {
-      const formData = { email, name, phone };
+        const patient = {
+          userId: user.$id,
+          name: values.name,
+          email: values.email,
+          phone: values.phone,
+          birthDate: new Date(values.birthDate),
+          gender: values.gender,
+          address: values.address,
+          occupation: values.occupation,
+          emergencyContactName: values.emergencyContactName,
+          emergencyContactNumber: values.emergencyContactNumber,
+          primaryPhysician: values.primaryPhysician,
+          insuranceProvider: values.insuranceProvider,
+          insurancePolicyNumber: values.insurancePolicyNumber,
+          familyMedicalHistory: values.familyMedicalHistory,
+          pastMedicalHistory: values.pastMedicalHistory,
+          identificationType: values.identificationType,
+          identificationNumber: values.identificationNumber,
+          IdentificationDocument: blob as Blob,
+        };
+        const newPatient = await registerPatient(patient);
 
-      const newUser = await createUser(formData);
+        if (newPatient) {
+          router.push(`/patients/${user.$id}/new-appointment`);
+        }
 
-      if (newUser) {
         setIsLoading(false);
-        router.push(`/patients/${newUser.$id}/register`);
       }
-    } catch (error) {
-      console.log(error);
     }
   }
 
@@ -74,7 +108,7 @@ const RegisterForm = ({ user }: { user: User }) => {
               label="Full Name"
               placeholder="Salman Mughal"
               iconSource="/assets/user.svg"
-              iconAlt="user"
+              iconAlt="name"
             />
 
             <div className="flex flex-col gap-6 xl:flex-row">
@@ -93,7 +127,7 @@ const RegisterForm = ({ user }: { user: User }) => {
                 control={form.control}
                 name="phone"
                 label="Phone Number"
-                placeholder="(555) 123-4567"
+                placeholder="(92) 3476246122"
               />
             </div>
             {/* BirthDate & Gender */}
@@ -231,7 +265,7 @@ const RegisterForm = ({ user }: { user: User }) => {
               <CustomFormField
                 fieldType={FormFieldTypes.TEXTAREA}
                 control={form.control}
-                name="pastMedicalHistoyr"
+                name="pastMedicalHistory"
                 label="Past medical history (if any)"
                 placeholder="Suffered from high blood pressure"
               />
@@ -274,7 +308,7 @@ const RegisterForm = ({ user }: { user: User }) => {
             <CustomFormField
               fieldType={FormFieldTypes.SKELETON}
               control={form.control}
-              name="identificationFile"
+              name="identificationDocument"
               label="identification file"
               renderSkeleton={(field) => (
                 <FormControl>
@@ -299,7 +333,10 @@ const RegisterForm = ({ user }: { user: User }) => {
             <Image src={"/assets/Next.svg"} width={32} height={32} alt="next" />
           </button>
         )}
-        <SubmitButton isLoading={isLoading}>Get Started</SubmitButton>
+        {/* <SubmitButton isLoading={isLoading}>Get Started</SubmitButton> */}
+        <button onClick={() => onSubmit(form.getValues())} type="submit">
+          Submit
+        </button>
       </form>
     </Form>
   );
