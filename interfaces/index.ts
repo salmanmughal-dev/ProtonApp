@@ -17,7 +17,7 @@ export interface User extends CreateUserParams {
   $id: string;
 }
 
-declare type CreateAppointmentParams = {
+export type CreateAppointmentParams = {
   userId: string;
   patient: string;
   primaryPhysician: string;
@@ -27,7 +27,7 @@ declare type CreateAppointmentParams = {
   note: string | undefined;
 };
 
-declare type UpdateAppointmentParams = {
+export type UpdateAppointmentParams = {
   appointmentId: string;
   userId: string;
   appointment: Appointment;
