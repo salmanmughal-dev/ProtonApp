@@ -21,6 +21,7 @@ import SubmitButton from "../components/SubmitButton";
 import { Form } from "../components/ui/form";
 import { Status } from "@/interfaces";
 import { getAppointmentSchema } from "@/zodSchema/appointmentSchema";
+import successToast from "@/toast/success";
 
 export const AppointmentForm = ({
   userId,
@@ -89,7 +90,7 @@ export const AppointmentForm = ({
         if (newAppointment) {
           form.reset();
           router.push(
-            `/patients/${userId}/new-appointment/success?appointmentId=${newAppointment.$id}`
+            `/patient/${userId}/new-appointment/success?appointmentId=${newAppointment.$id}`
           );
         }
       } else {

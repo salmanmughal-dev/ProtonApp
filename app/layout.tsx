@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "react-toastify/dist/ReactToastify.css";
 import { EdgeStoreProvider } from "../lib/edgestore";
 import "./globals.css";
+import { ToastContainer } from "react-toastify";
 
 const fontSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -26,11 +27,24 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <ToastContainer
+          position="top-left"
+          autoClose={1000}
+          hideProgressBar
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
         <EdgeStoreProvider>
           <ThemeProvider attribute="class" defaultTheme="dark">
             {children}
           </ThemeProvider>
         </EdgeStoreProvider>
+        <ToastContainer />
       </body>
     </html>
   );
