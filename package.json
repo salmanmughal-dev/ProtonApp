@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@edgestore/react": "^0.2.2",
+    "@edgestore/server": "^0.2.2",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-radio-group": "^1.2.0",
@@ -31,6 +33,7 @@
     "react-hook-form": "^7.52.2",
     "react-notifications": "^1.7.4",
     "react-phone-number-input": "^3.4.5",
+    "react-spinners": "^0.14.1",
     "react-toastify": "^10.0.5",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",

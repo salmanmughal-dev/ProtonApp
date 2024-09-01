@@ -1,46 +1,97 @@
 "use client";
-import { convertFileToUrl } from "@/lib/utils";
-import { appendFile } from "fs";
-import Image from "next/image";
-import React, { useCallback, useEffect } from "react";
-import { useDropzone } from "react-dropzone";
+import * as React from "react";
+import { useState, CSSProperties } from "react";
+import DotLoader from "react-spinners/DotLoader";
+import { useEdgeStore } from "../lib/edgestore";
+import { ToastContainer, toast, Slide } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-type filesPropsType = {
-  files: File[] | undefined;
-  onChange: (files: File[]) => void;
+const override: CSSProperties = {
+  display: "block",
+  margin: "0 auto",
+  borderColor: "red",
 };
-export default function FileUploader({ files, onChange }: filesPropsType) {
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    onChange(acceptedFiles);
-  }, []);
+export default function FileUploader({
+  setUrl,
+}: {
+  setUrl: (url: string) => void;
+}) {
+  const [file, setFile] = React.useState<File>();
+  let [loading, setLoading] = useState(false);
+  const { edgestore } = useEdgeStore();
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
-
+  const notify = () => {
+    toast.success("🦄 Wow so easy!", {
+      position: "top-left",
+      autoClose: 1000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
+  };
   return (
-    <div {...getRootProps()} className="file-upload">
-      <input {...getInputProps()} />
-      {files && files?.length > 0 ? (
-        <Image
-          src={convertFileToUrl(files[0])}
-          width={1000}
-          height={1000}
-          alt="uploaded image"
-          className="max-h-[400px] overflow-hidden object-cover"
-        />
-      ) : (
-        <>
-          <Image src="/assets/upload.svg" width={40} height={40} alt="upload" />
-          <div className="file-upload_label">
-            <p className="text-14-regular ">
-              <span className="text-red-700">Click to upload </span>
-              or drag and drop
-            </p>
-            <p className="text-12-regular">
-              SVG, PNG, JPG or GIF (max. 800x400px)
-            </p>
-          </div>
-        </>
+    <>
+      <ToastContainer
+        position="top-left"
+        autoClose={1000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+
+      <DotLoader
+        color={"#36d7b7"}
+        loading={loading}
+        cssOverride={override}
+        size={250}
+        aria-label="Loading Spinner"
+        data-testid="loader"
+      />
+
+      {!loading && (
+        <div className="flex items-center justify-center gap-10">
+          {/* Same as */}
+
+          <input
+            className="file-upload"
+            type="file"
+            onChange={(e) => {
+              setFile(e.target.files?.[0]);
+            }}
+          />
+          <button
+            className="m-2 rounded-lg bg-green-500 p-2 text-white"
+            onClick={async () => {
+              if (file) {
+                setLoading(true);
+                const res = await edgestore.publicFiles.upload({
+                  file,
+                  onProgressChange: (progress) => {
+                    // you can use this to show a progress bar
+                    console.log(progress);
+                  },
+                });
+                // you can run some server action or api here
+                // to add the necessary data to your database
+                setUrl(res.url);
+                setLoading(false);
+                notify();
+              }
+            }}
+          >
+            Upload
+          </button>
+        </div>
       )}
-    </div>
+      <ToastContainer />
+    </>
   );
 }
