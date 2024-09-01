@@ -4,6 +4,8 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import "react-toastify/dist/ReactToastify.css";
+import { EdgeStoreProvider } from "../lib/edgestore";
+import "./globals.css";
 
 const fontSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -24,9 +26,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ThemeProvider attribute="class" defaultTheme="dark">
-          {children}
-        </ThemeProvider>
+        <EdgeStoreProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark">
+            {children}
+          </ThemeProvider>
+        </EdgeStoreProvider>
       </body>
     </html>
   );

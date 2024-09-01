@@ -37,6 +37,8 @@ const RegisterForm = ({ user }: { user: User }) => {
   const [isShowMedicalHistory, setIsShowMedicalHistory] =
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [IdentificationDocumentUrl, setIdentificationDocumentUrl] =
+    useState<string>("");
   const [isShowIdentification, setIsShowIdentification] =
     useState<boolean>(false);
   // 1. Define your form.
@@ -48,47 +50,34 @@ const RegisterForm = ({ user }: { user: User }) => {
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof PatientFormValidation>) {
     setIsLoading(true);
-    if (
-      values.identificationDocument &&
-      values.identificationDocument?.length > 0
-    ) {
-      if (
-        values.identificationDocument &&
-        values.identificationDocument?.length > 0
-      ) {
-        const file = values.identificationDocument![0];
-        const blob = new Blob([file], { type: file.type });
-        // @ts-ignore
 
-        const patient = {
-          userId: user.$id,
-          name: values.name,
-          email: values.email,
-          phone: values.phone,
-          birthDate: new Date(values.birthDate),
-          gender: values.gender,
-          address: values.address,
-          occupation: values.occupation,
-          emergencyContactName: values.emergencyContactName,
-          emergencyContactNumber: values.emergencyContactNumber,
-          primaryPhysician: values.primaryPhysician,
-          insuranceProvider: values.insuranceProvider,
-          insurancePolicyNumber: values.insurancePolicyNumber,
-          familyMedicalHistory: values.familyMedicalHistory,
-          pastMedicalHistory: values.pastMedicalHistory,
-          identificationType: values.identificationType,
-          identificationNumber: values.identificationNumber,
-          IdentificationDocument: blob as Blob,
-        };
-        const newPatient = await registerPatient(patient);
+    const patient = {
+      userId: user.$id,
+      name: values.name,
+      email: values.email,
+      phone: values.phone,
+      birthDate: new Date(values.birthDate),
+      gender: values.gender,
+      address: values.address,
+      occupation: values.occupation,
+      emergencyContactName: values.emergencyContactName,
+      emergencyContactNumber: values.emergencyContactNumber,
+      primaryPhysician: values.primaryPhysician,
+      insuranceProvider: values.insuranceProvider,
+      insurancePolicyNumber: values.insurancePolicyNumber,
+      familyMedicalHistory: values.familyMedicalHistory,
+      pastMedicalHistory: values.pastMedicalHistory,
+      identificationType: values.identificationType,
+      identificationNumber: values.identificationNumber,
+      IdentificationDocumentUrl,
+    };
+    const newPatient = await registerPatient(patient);
 
-        if (newPatient) {
-          router.push(`/patients/${user.$id}/new-appointment`);
-        }
-
-        setIsLoading(false);
-      }
+    if (newPatient) {
+      router.push(`/patients/${user.$id}/new-appointment`);
     }
+
+    setIsLoading(false);
   }
 
   return (
@@ -312,7 +301,7 @@ const RegisterForm = ({ user }: { user: User }) => {
               label="identification file"
               renderSkeleton={(field) => (
                 <FormControl>
-                  <FileUploader files={field.value} onChange={field.onChange} />
+                  <FileUploader setUrl={setIdentificationDocumentUrl} />
                 </FormControl>
               )}
             />
@@ -334,7 +323,11 @@ const RegisterForm = ({ user }: { user: User }) => {
           </button>
         )}
         {/* <SubmitButton isLoading={isLoading}>Get Started</SubmitButton> */}
-        <button onClick={() => onSubmit(form.getValues())} type="submit">
+        <button
+          className="m-2 rounded-lg w-1/2 ml-[15vw] bg-green-500 p-2 text-white"
+          onClick={() => onSubmit(form.getValues())}
+          type="submit"
+        >
           Submit
         </button>
       </form>
